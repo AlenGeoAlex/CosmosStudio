@@ -8,3 +8,11 @@ node_modules
 !.env.example
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+/.idea/
+/.idea/.gitignore
+/.idea/CG.iml
+/.idea/codeStyles/codeStyleConfig.xml
+/.idea/discord.xml
+/.idea/modules.xml
+/package-lock.json
+/.idea/codeStyles/Project.xml
