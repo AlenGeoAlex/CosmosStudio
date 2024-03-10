@@ -12,7 +12,14 @@
 	import { DialogService } from '$lib/service/dialog-service';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { toast } from 'svelte-sonner';
-	import { extractCosmosError, getInvalidDefinitions, isNullOrUndefined, shorten } from '$lib/utils';
+	import {
+		copyToClipboard,
+		delay,
+		extractCosmosError,
+		getInvalidDefinitions,
+		isNullOrUndefined,
+		shorten
+	} from '$lib/utils';
 	import { Separator } from '$lib/components/ui/separator';
 	import DocumentWriteMonoco from './document/DocumentWriteMonoco.svelte';
 
@@ -45,15 +52,12 @@
 				});
 				getPartitionKey().then(x => {
 					partitionKey = x;
-				});
-				SpinnerService.setWithOptions({
-					text: `Loading ${selectedContainer} documents`,
-					color: 'purple',
-					shorted: false
+					documentArray = [];
+					selectedDocument = undefined;
 				});
 				executeDocumentQuery('SELECT * FROM C ORDER BY C._ts DESC');
-			}finally {
-				SpinnerService.unset();
+			}catch (e){
+
 			}
 		}
 	}
@@ -91,38 +95,44 @@
 
 	}
 	export async function executeDocumentQuery(query : string){
-		const queryResponse = await azureService.queryAdapter.query(query, selectedContainerRef);
-		if(queryResponse.status){
-			documentArray = queryResponse.response?.resources ?? [];
-			currentIterator = queryResponse.iterator;
-			toast.info('Executed', {
-				description: `Consumed ≈ ${Math.round(queryResponse.response?.requestCharge ?? 0)} RU`
-			});
-		}else{
-			if(queryResponse.error !== undefined){
-				const cosmosError = queryResponse.error as ErrorResponse;
-				const message = extractCosmosError(cosmosError);
-				if(message){
-					toast.error('Invalid Query', {
-						description: message,
-						action: {
-							label: 'Undo',
-							onClick: () => {
-								executeDocumentQuery('SELECT * FROM C ORDER BY C._ts DESC');
+		try {
+			const queryResponse = await azureService.queryAdapter.query(query, selectedContainerRef);
+			if(queryResponse.status){
+				documentArray = queryResponse.response?.resources ?? [];
+				currentIterator = queryResponse.iterator;
+				toast.info('Executed', {
+					description: `Consumed ≈ ${Math.round(queryResponse.response?.requestCharge ?? 0)} RU`
+				});
+			}else{
+				if(queryResponse.error !== undefined){
+					const cosmosError = queryResponse.error as ErrorResponse;
+					const message = extractCosmosError(cosmosError);
+					if(message){
+						toast.error('Invalid Query', {
+							description: message,
+							action: {
+								label: 'Undo',
+								onClick: () => {
+									executeDocumentQuery('SELECT * FROM C ORDER BY C._ts DESC');
+								}
 							}
-						}
-					});
-				}else{
-					toast.error('Invalid Query', {
-						action: {
-							label: 'Undo',
-							onClick: () => {
-								executeDocumentQuery('SELECT * FROM C ORDER BY C._ts DESC');
+						});
+					}else{
+						toast.error('Invalid Query', {
+							action: {
+								label: 'Undo',
+								onClick: () => {
+									executeDocumentQuery('SELECT * FROM C ORDER BY C._ts DESC');
+								}
 							}
-						}
-					});
+						});
+					}
 				}
 			}
+		}catch (e){
+
+		}finally {
+			SpinnerService.unset();
 		}
 
 	}
@@ -384,6 +394,13 @@
 
 	}
 
+	function copy(content : string){
+		copyToClipboard(content)
+			.then(x => {
+				toast.info(`Copied ${shorten(content)} to clipboard`)
+			})
+	}
+
 	onDestroy(() => {
 		try {
 			abortController.abort(`Page closed!`);
@@ -393,16 +410,16 @@
 	});
 </script>
 
-<div class="h-screen w-screen">
+<div class="">
 	<Resizable.PaneGroup direction="horizontal">
 		<Resizable.Pane defaultSize={$settings.resizableSize}>
-			<div class="flex w-full flex-col">
-				<Table.Root  class="overflow-auto">
+			<div class="flex w-full h-full flex-col">
+				<Table.Root class="overflow-visible">
 					<Table.Header>
 						<Table.Row>
-							<Table.Head class="w-3/6">Id</Table.Head>
-							<Table.Head class="w-2/6">{(partitionKey === null || partitionKey === undefined) ? `` : partitionKey}</Table.Head>
-							<Table.Head class="w-1/6">
+							<Table.Head class="w-[300px]">Id</Table.Head>
+							<Table.Head class="w-[300px]">{(partitionKey === null || partitionKey === undefined) ? `` : partitionKey}</Table.Head>
+							<Table.Head class="text-right">
 								<Tooltip.Root>
 									<Tooltip.Trigger asChild let:builder>
 										<Button builders={[builder]} variant="ghost" size="icon" class="w-4" on:click={async () => {await loadMore()}}>
@@ -416,31 +433,39 @@
 							</Table.Head>
 						</Table.Row>
 					</Table.Header>
-					<Table.Body class="relative">
-						<div class="fixed">
-							<ScrollArea class="h-screen">
-								{#each documentArray as document}
-									<Table.Row on:click={async () => {await select(document)}} class="hover:cursor-pointer">
-										<Table.Cell class="w-3/6">{document.id ?? ``}</Table.Cell>
-										<Table.Cell class="w-2/6">{document[partitionKey.slice(1)]?.toString() ?? ``}</Table.Cell>
-										<Table.Cell class="w-1/6">
-											{#if (savingDocument !== null && savingDocument !== undefined && savingDocument.id === document.id)}
-												<Upload size={14}></Upload>
-											{:else if (document.id === selectedDocument.id)}
-												<!-- svelte-ignore a11y-click-events-have-key-events -->
-												<div role="button" tabindex="0" on:mouseenter={() => {isHoveringForRefresh = true}} on:mouseleave={() => {isHoveringForRefresh = false}} on:click={ async () => {if(!isHoveringForRefresh) return; await refresh(document)}}>
-													{#if isHoveringForRefresh}
-														<RefreshCcw size={14}/>
-													{:else}
-														<ChevronsLeft size={14}/>
-													{/if}
-												</div>
-											{/if}
-										</Table.Cell>
-									</Table.Row>
-								{/each}
-							</ScrollArea>
-						</div>
+					<Table.Body class=" overflow-y-auto">
+							{#each documentArray as document}
+								<Table.Row on:click={async () => {await select(document)}} class="hover:cursor-pointer">
+									<Table.Cell>
+										<!-- svelte-ignore a11y-no-static-element-interactions -->
+										<!-- svelte-ignore a11y-click-events-have-key-events -->
+										<span on:click={() => {copy(document?.id ?? '')}} class="hover:text-gray-300">
+											{shorten(document?.id ?? '', 36) ?? ``}
+										</span>
+									</Table.Cell>
+									<Table.Cell class="">
+										<!-- svelte-ignore a11y-no-static-element-interactions -->
+										<!-- svelte-ignore a11y-click-events-have-key-events -->
+										<span on:click={() => {copy(document[partitionKey.slice(1)]?.toString() ?? ``)}} class="hover:text-gray-300">
+											{shorten(document[partitionKey.slice(1)]?.toString() ?? ``, 36)}
+										</span>
+									</Table.Cell>
+									<Table.Cell class="text-right">
+										{#if (savingDocument !== null && savingDocument !== undefined && savingDocument.id === document.id)}
+											<Upload size={14}></Upload>
+										{:else if (document.id === selectedDocument.id)}
+											<!-- svelte-ignore a11y-click-events-have-key-events -->
+											<div role="button" tabindex="0" on:mouseenter={() => {isHoveringForRefresh = true}} on:mouseleave={() => {isHoveringForRefresh = false}} on:click={ async () => {if(!isHoveringForRefresh) return; await refresh(document)}}>
+												{#if isHoveringForRefresh}
+													<RefreshCcw size={14}/>
+												{:else}
+													<ChevronsLeft size={14}/>
+												{/if}
+											</div>
+										{/if}
+									</Table.Cell>
+								</Table.Row>
+							{/each}
 					</Table.Body>
 				</Table.Root>
 			</div>
@@ -456,3 +481,7 @@
 		</Resizable.Pane>
 	</Resizable.PaneGroup>
 </div>
+
+<style>
+
+</style>

@@ -5,14 +5,16 @@
 	import type { JumperOption } from '$lib/components/shared/commons/models';
 	let spinner : Nullable<JumperOption> = $jumper;
 
-
+	$: {
+		spinner = $jumper;
+	}
 </script>
 
-{#if $jumper !== null && jumper !== undefined}
+{#if spinner !== null && spinner !== undefined}
 	<div class="flex flex-col spinner-overlay">
-		<Spinner color={$jumper.color} size={$jumper.size} />
-		{#if $jumper.text !== undefined}
-			<h4 class="mt-2 text">{$jumper.shorted ? `${shorten($jumper.text, 9)}` : $jumper.text}</h4>
+		<Spinner color={spinner.color} size={spinner.size} />
+		{#if spinner.text !== undefined}
+			<h4 class="mt-2 text">{spinner.shorted ? `${shorten(spinner.text, 9)}` : spinner.text}</h4>
 		{/if}
 	</div>
 {/if}
