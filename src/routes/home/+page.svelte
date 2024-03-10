@@ -101,22 +101,22 @@
                     </div>
                 </div>
             </div>
-            <div class="flex-1 flex-col mt-5 flex-grow h-1/2  overflow-auto">
-                <div class="flex mx-auto ps-6 gap-2 sticky top-0 bg-black pb-5 rounded">
-                    <History size={20} strokeWidth={1.5} class="mt-0.5" absoluteStrokeWidth />
-                    <h1 class="font-bold ">History</h1>
-                    <div class="ml-auto me-5 mt-[0]">
-                        <Button variant="ghost">
-                            <Trash2Icon size={20} strokeWidth={1.5} class="flex justify-end" absoluteStrokeWidth />
-                        </Button>
-                    </div>
-                </div>
-                <div class="flex justify-center items-center mt-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <LineHistory></LineHistory>
-                    </div>
-                </div>
-            </div>
+<!--            <div class="flex-1 flex-col mt-5 flex-grow h-1/2  overflow-auto">-->
+<!--                <div class="flex mx-auto ps-6 gap-2 sticky top-0 bg-black pb-5 rounded">-->
+<!--                    <History size={20} strokeWidth={1.5} class="mt-0.5" absoluteStrokeWidth />-->
+<!--                    <h1 class="font-bold ">History</h1>-->
+<!--                    <div class="ml-auto me-5 mt-[0]">-->
+<!--                        <Button variant="ghost">-->
+<!--                            <Trash2Icon size={20} strokeWidth={1.5} class="flex justify-end" absoluteStrokeWidth />-->
+<!--                        </Button>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="flex justify-center items-center mt-4">-->
+<!--                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">-->
+<!--                        <LineHistory></LineHistory>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
         </div>
         <div class="h-10">
             <div class="title text-center py-2">Cosmos <span class="text-cyan-400">Studio</span></div>

@@ -48,7 +48,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "me.alenalex.cosmos.studio",
+      "identifier": "me.cosmos-studio",
       "longDescription": "Cosmos Studio is a modern yet innovative client to connect to Azure's Cosmos NoSQL database.",
       "macOS": {
         "entitlements": null,
