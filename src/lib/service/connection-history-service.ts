@@ -26,10 +26,26 @@ function reconstruct(conn : ConnectionSchema[]) : ConnectionSchema[] {
           connectionSchema.lastConnected,
           connectionSchema.badgeText,
           connectionSchema.badgeColor,
-          connectionSchema.lastUsedDatabase
+          connectionSchema.lastUsedDatabase,
+          new Map<string, string>(Object.entries(connectionSchema.lastPreservedContainer ?? {}))
         ));
     }
     return reconstructed;
+}
+
+function reconstructSingle(conn : ConnectionSchema) : ConnectionSchema {
+    return new ConnectionSchema(
+      conn.id,
+      conn.name,
+      conn.endpoint,
+      conn.primaryKey,
+      conn.databases,
+      conn.lastConnected,
+      conn.badgeText,
+      conn.badgeColor,
+      conn.lastUsedDatabase,
+      new Map<string, string>(Object.entries(conn.lastPreservedContainer ?? {}))
+    );
 }
 
 export async function addConnectionSchema(conn: ConnectionSchema, temp : boolean = false) {
@@ -49,11 +65,9 @@ export async function updateConnectionSchema(conn: ConnectionSchema, temp: boole
 
         // Update the connection at the found index with the new connection data
         current[index] = conn;
-
         // Update the store with the connections that are not temporary
         const nonTempConnections = current.filter(x => !x.temp);
         store.set(StoreKeys.SavedConnections, nonTempConnections);
-
         return current;
     });
 }
@@ -64,6 +78,9 @@ export async function getConnectionSchema(id : string) : Promise<Nullable<Connec
         connSchema = sub.find(x => x.id === id) ?? null;
     })
     unsub();
+    if(connSchema !== null && connSchema !== undefined)
+        return reconstructSingle(connSchema);
+
     return connSchema;
 }
 

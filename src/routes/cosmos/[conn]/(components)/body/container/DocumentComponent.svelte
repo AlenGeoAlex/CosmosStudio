@@ -39,6 +39,7 @@
 	let documentArray : any[] = [];
 	let currentIterator : Nullable<QueryIterator<any>> = null;
 	let hasMore = false;
+	let loadingMore = false;
 
 	let savingDocument : Nullable<any>;
 	let isHoveringForRefresh = false;
@@ -137,6 +138,7 @@
 
 	}
 	export async function saveCurrent(){
+		console.log()
 		if(!isDocDirty)
 			return;
 
@@ -278,13 +280,15 @@
 		}
 
 		let editedDocument : Nullable<any> = undefined;
-
+		let jsonError : Nullable<string>
 		try {
 			editedDocument = JSON.parse(editedDocumentRaw as string);
-		}catch (e) {}
+		}catch (e : any) {
+			jsonError = e.toString();
+		}
 		if(isNullOrUndefined(editedDocument)){
 			toast.error('Invalid Entity', {
-				description: 'Not a valid JSON'
+				description: `Not a valid JSON. ${jsonError ?? ``}`
 			});
 			return null;
 
@@ -386,11 +390,35 @@
 	}
 
 	async function loadMore(){
-		if(currentIterator === null || currentIterator === undefined) {
+		if(loadingMore)
 			return;
 
+
+		if(currentIterator === null || currentIterator === undefined) {
+			return;
 		}
-		documentArray.push(await currentIterator.fetchNext());
+		loadingMore = true;
+
+		try {
+			SpinnerService.setWithOptions({
+				text: "Loading more",
+				shorted: false,
+				color: 'purple'
+			});
+			const feedResponse = await currentIterator.fetchNext();
+			const resources = feedResponse.resources;
+			documentArray = documentArray.concat(resources);
+			console.log(documentArray)
+			toast.info('Success', {
+				description: `Loaded ${resources.length} more on [${documentArray.length}] results and costed ≈ ${Math.round(feedResponse.requestCharge)} RU`
+			})
+		}catch (e){
+
+		}finally {
+			loadingMore = false;
+			SpinnerService.unset();
+		}
+
 
 	}
 
@@ -399,6 +427,19 @@
 			.then(x => {
 				toast.info(`Copied ${shorten(content)} to clipboard`)
 			})
+	}
+
+	async function onLazyScroll(e : any) {
+		//@ts-ignore
+		const offsetHeight = e.target?.offsetHeight;
+		//@ts-ignore
+		const scrollTop = e.target?.scrollTop;
+		//@ts-ignore
+		const scrollHeight = e.target?.scrollHeight;
+		const currentScroll = offsetHeight + scrollTop + 10;
+		if(currentScroll >= scrollHeight){
+			await loadMore();
+		}
 	}
 
 	onDestroy(() => {
@@ -413,8 +454,8 @@
 <div class="">
 	<Resizable.PaneGroup direction="horizontal">
 		<Resizable.Pane defaultSize={$settings.resizableSize}>
-			<div class="flex w-full h-full flex-col">
-				<Table.Root class="overflow-visible">
+			<div class="flex-col flex documentList" on:scroll={(e) =>{onLazyScroll(e)}}>
+				<Table.Root>
 					<Table.Header>
 						<Table.Row>
 							<Table.Head class="w-[300px]">Id</Table.Head>
@@ -433,7 +474,7 @@
 							</Table.Head>
 						</Table.Row>
 					</Table.Header>
-					<Table.Body class=" overflow-y-auto">
+					<Table.Body>
 							{#each documentArray as document}
 								<Table.Row on:click={async () => {await select(document)}} class="hover:cursor-pointer">
 									<Table.Cell>

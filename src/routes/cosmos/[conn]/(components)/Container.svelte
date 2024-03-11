@@ -12,6 +12,7 @@ import { toast } from 'svelte-sonner';
 import { type Readable, readonly, writable } from 'svelte/store';
 import { ContainerActions } from '$lib/constants/enums';
 import { Container } from '@azure/cosmos';
+import { updateConnectionSchema } from '$lib/service/connection-history-service';
 
 export let schema : ConnectionSchema;
 export let azureService : AzureService;
@@ -40,7 +41,13 @@ $: {
 	if(selectedContainer !== undefined)
 		azureService.container.getRef(selectedContainer, selectedDatabase)
 			.then(x => {
-				selectedContainerRef = x;
+				if(x){
+					selectedContainerRef = x;
+					schema.updateContainerFor(selectedDatabase, x?.id);
+					updateConnectionSchema(schema);
+				}else{
+					selectedContainer = undefined;
+				}
 			})
 			.catch(er => {
 				console.log(er)
@@ -53,6 +60,12 @@ async function saveCurrentDoc(){
 
 async function loadContainers(){
 	availableContainers = await azureService.container.list(selectedDatabase)
+	const lastContainer = schema.lastPreservedContainer.get(selectedDatabase);
+	if(lastContainer){
+		if(availableContainers.map(x => x.name).includes(lastContainer)){
+			selectedContainer = lastContainer;
+		}
+	}
 }
 
 async function createConsole(){

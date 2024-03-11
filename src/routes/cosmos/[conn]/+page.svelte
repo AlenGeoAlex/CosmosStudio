@@ -12,6 +12,7 @@
 	import { toast } from 'svelte-sonner';
 	import NoDatabaseSelectedComponent from './(components)/NoDatabaseSelectedComponent.svelte';
 	import Container from './(components)/Container.svelte';
+	import { isNullOrUndefined } from '$lib/utils';
 
 	export let data : PageData;
 	const schema : ConnectionSchema = data.schema;
@@ -163,7 +164,7 @@
 						schema={schema}
 						selectedDatabase={childState.header.selectedDatabase}
 						azureService={service}
-						selectedContainer={childState.container.selectedContainer}
+						bind:selectedContainer={childState.container.selectedContainer}
 					></Container>
 				{/if}
 			</div>

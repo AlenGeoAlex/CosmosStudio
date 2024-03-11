@@ -11,10 +11,11 @@ export class ConnectionSchema {
     badgeColor : "red" | "yellow" | "green" | "indigo" | "purple" | "pink" | "blue" | "dark" | "primary" | "none" | undefined;
     temp : boolean = false;
     lastUsedDatabase : string | undefined;
+    lastPreservedContainer : Map<string, string>;
 
     [key: string]: any;
 
-    constructor(id : string ,name: string, endpoint: string, primaryKey: string, databases: string[], lastConnected: number, badgeText : string | undefined = undefined, badgeColor : "red" | "yellow" | "green" | "indigo" | "purple" | "pink" | "blue" | "dark" | "primary" | "none" | undefined = 'none', lastUsedDatabase : string | undefined) {
+    constructor(id : string ,name: string, endpoint: string, primaryKey: string, databases: string[], lastConnected: number, badgeText : string | undefined = undefined, badgeColor : "red" | "yellow" | "green" | "indigo" | "purple" | "pink" | "blue" | "dark" | "primary" | "none" | undefined = 'none', lastUsedDatabase : string | undefined, lastPreservedContainer? : Map<string, string>) {
         this.id = id;
         this.name = name;
         this.endpoint = endpoint;
@@ -24,6 +25,7 @@ export class ConnectionSchema {
         this.badgeText = badgeText;
         this.badgeColor = badgeColor;
         this.lastUsedDatabase = lastUsedDatabase;
+        this.lastPreservedContainer = lastPreservedContainer ?? new Map<string, string>();
     }
 
     public updateDatabases(dbs : string[]) : void {
@@ -34,6 +36,10 @@ export class ConnectionSchema {
         }else{
             this.databases = this.databases.filter(x => dbs.includes(x));
         }
+    }
+
+    public updateContainerFor(database : string, containerName : string){
+        this.lastPreservedContainer.set(database, containerName);
     }
 
     public updateLastUsed(db : string) : void {

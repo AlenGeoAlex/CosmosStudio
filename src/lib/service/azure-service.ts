@@ -203,7 +203,7 @@ class QueryAdapter {
 		this.cosmosClient = cosmosClient;
 	}
 
-	async query(queryString : string, containerRef : Container, maxItemCount : number = 20) : Promise<{ status : boolean, error?: any, response? : FeedResponse<any>, iterator? : QueryIterator<any>}>{
+	async query(queryString : string, containerRef : Container, maxItemCount : number = 50) : Promise<{ status : boolean, error?: any, response? : FeedResponse<any>, iterator? : QueryIterator<any>}>{
 		try {
 			const queryIterator = containerRef.items.query(queryString, {
 				maxItemCount: maxItemCount,
