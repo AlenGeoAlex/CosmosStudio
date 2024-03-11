@@ -164,7 +164,7 @@
 						schema={schema}
 						selectedDatabase={childState.header.selectedDatabase}
 						azureService={service}
-						bind:selectedContainer={childState.container.selectedContainer}
+						selectedContainer={childState.container.selectedContainer}
 					></Container>
 				{/if}
 			</div>

@@ -436,7 +436,7 @@
 		const scrollTop = e.target?.scrollTop;
 		//@ts-ignore
 		const scrollHeight = e.target?.scrollHeight;
-		const currentScroll = offsetHeight + scrollTop + 10;
+		const currentScroll = offsetHeight + scrollTop + 3;
 		if(currentScroll >= scrollHeight){
 			await loadMore();
 		}
