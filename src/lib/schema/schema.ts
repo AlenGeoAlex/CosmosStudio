@@ -36,6 +36,8 @@ export class ConnectionSchema {
         }else{
             this.databases = this.databases.filter(x => dbs.includes(x));
         }
+
+        this.databases = this.databases.filter(x => x.length !== 0);
     }
 
     public updateContainerFor(database : string, containerName : string){

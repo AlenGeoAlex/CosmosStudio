@@ -138,7 +138,6 @@
 
 	}
 	export async function saveCurrent(){
-		console.log()
 		if(!isDocDirty)
 			return;
 
@@ -408,7 +407,6 @@
 			const feedResponse = await currentIterator.fetchNext();
 			const resources = feedResponse.resources;
 			documentArray = documentArray.concat(resources);
-			console.log(documentArray)
 			toast.info('Success', {
 				description: `Loaded ${resources.length} more on [${documentArray.length}] results and costed ≈ ${Math.round(feedResponse.requestCharge)} RU`
 			})

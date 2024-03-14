@@ -2,9 +2,11 @@
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
 	import { theme } from '$lib/components/shared/monaco';
-	import { isNullOrUndefined } from '$lib/utils';
+	import { getMatchingElementsInArray, isNullOrUndefined } from '$lib/utils';
+	const regex = /"([^"]+)"(?=\s*:\s*)/g;
 
 	const dispatcher = createEventDispatcher();
+	const restrictedKeys = ["_ts", "_rid", "_self", "_etag", "_attachments", "_ttl"];
 	let editor: Monaco.editor.IStandaloneCodeEditor;
 	let monaco: typeof Monaco;
 	let editorContainer: HTMLElement;
@@ -25,6 +27,43 @@
 			editedDocumentRaw = editor.getValue();
 			dirty = true;
 		});
+
+		editor.onDidChangeCursorSelection(async (e) => {
+			try {
+				let startLineNumber = e.selection.startLineNumber;
+				let endLineNumber = e.selection.endLineNumber;
+
+				const includedKeys : string[] = []
+				for(let i = startLineNumber; i <= endLineNumber; i++){
+					const lineContent = editor.getModel()?.getLineContent(i);
+					if(!lineContent)
+						continue;
+
+					includedKeys.push(...getKeysOfStrings(lineContent));
+				}
+
+				const matchingElementsInArray = getMatchingElementsInArray(includedKeys, restrictedKeys);
+
+				if(matchingElementsInArray.length > 0){
+					editor.updateOptions({
+						readOnly: true,
+						readOnlyMessage: {
+							value: `Cannot edit ${matchingElementsInArray.join(", ")}.`
+						}
+					})
+				}else{
+					if(editor.getRawOptions().readOnly){
+						editor.updateOptions({
+							readOnly: false
+						})
+					}
+				}
+			}catch (e){
+
+			}
+
+		})
+
 		editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, save)
 		editor.addAction({
 			id: "save-doc",
@@ -37,6 +76,25 @@
 			run: () => save()
 		})
 	});
+
+	function getKeysOfStrings(entry : string) : string[]{
+		const matchedString : string[] = []
+		try {
+			const matches = entry.match(regex);
+			if (matches) {
+				matches.forEach(x => {
+					let keyRaw = x;
+					keyRaw = x
+						.replaceAll("\"", ``)
+						.replaceAll("\'", ``);
+					matchedString.push(keyRaw);
+				})
+			}
+		}catch (e){
+			//ignore
+		}
+		return matchedString;
+	}
 
 	function save(){
 		if(!dirty)

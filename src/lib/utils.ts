@@ -167,6 +167,10 @@ export function isNullOrUndefined(ob : any): boolean {
     return ob === null || ob === undefined
 }
 
+export function getMatchingElementsInArray(of: string[], from: string[]): string[] {
+    return of.filter(x => x && from.includes(x));
+}
+
 export function getInvalidDefinitions(ob: Record<string, any>, keys: string[]): string[] {
     const invalid: string[] = [];
 

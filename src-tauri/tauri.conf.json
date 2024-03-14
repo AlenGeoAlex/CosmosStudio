@@ -71,7 +71,7 @@
       }
     },
     "security": {
-      "csp": null
+      "csp": ""
     },
     "updater": {
       "active": false
@@ -82,7 +82,8 @@
         "height": 600,
         "resizable": true,
         "title": "Cosmos Studio",
-        "width": 800
+        "width": 800,
+        "additionalBrowserArgs": "--disable-web-security"
       }
     ]
   }

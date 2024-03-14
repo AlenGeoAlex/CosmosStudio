@@ -42,12 +42,14 @@ export class AzureService {
 		const client = new CosmosClient({
 			endpoint: schema.endpoint,
 			key: schema.primaryKey,
+
 			connectionPolicy: {
 				retryOptions: {
 					maxRetryAttemptCount: 1,
 					maxWaitTimeInSeconds: 4,
-					fixedRetryIntervalInMilliseconds: 200
-				}
+					fixedRetryIntervalInMilliseconds: 200,
+				},
+				enableEndpointDiscovery: false
 			}
 		});
 		return new AzureService(client);

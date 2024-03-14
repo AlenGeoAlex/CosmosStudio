@@ -83,8 +83,18 @@
     function handleEditInputEvent(event : any) {
         const target = event.target as HTMLInputElement;
         const field = target.dataset.field;
+        const array = target.dataset.array;
         if (field) {
-            editConnection[field] = target.value;
+            if(array){
+                let editConnectionElement = editConnection[field];
+                if(editConnectionElement === null || editConnectionElement === undefined){
+                    editConnectionElement = [target.value];
+                }else{
+                    editConnectionElement.push(target.value)
+                }
+            }else{
+                editConnection[field] = target.value;
+            }
         }
         validateEditing()
     }
@@ -174,6 +184,8 @@
         dispatcher('remove-confirm', connection)
     }
 
+    $: {console.log(connection.databases)}
+
 </script>
 
 
@@ -223,7 +235,7 @@
                     <h4 class="text-sm font-semibold">{shorten(connection.endpoint, 40)}</h4>
                     <div class="flex items-center pt-2">
                         <Database size={16} strokeWidth={0.75} />
-                        <p class="text-xs ml-2 text-muted-foreground">{(connection.databases.length === 0) ? `All/None` : shorten(connection.databases.sort().join(', '), 15)}</p>
+                        <p class="text-xs ml-2 text-muted-foreground">{(connection.databases.length === 0) ? `All/None` : shorten(connection.databases.join(",") , 15)}</p>
                     </div>
                     <div class="flex items-center pt-2">
                         <CalendarDays class="mr-2 h-4 w-4 opacity-70" />{" "}
@@ -260,7 +272,7 @@
                 </div>
                 <div class="grid grid-cols-4 items-center gap-4">
                     <Label for="databases" class="text-right">Databases</Label>
-                    <Input id="databases" value={editConnection.databases.join(',')} data-field="databases" on:input={(e) => {handleEditInputEvent(e)}} class="col-span-3" />
+                    <Input id="databases" value={editConnection.databases.join(',')} data-field="databases" data-array="true" on:input={(e) => {handleEditInputEvent(e)}} class="col-span-3" />
                 </div>
                 <div class="grid grid-cols-4 items-center gap-4">
                     <Label for="badge" class="text-right">Badge</Label>
