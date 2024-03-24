@@ -3,7 +3,7 @@
 import ContainerSelectorComponent from './body/header/ContainerSelectorComponent.svelte';
 import { AzureService } from '$lib/service/azure-service';
 import { type IContainer } from '$lib/components/models/azure-models';
-import { onMount } from 'svelte';
+import { onMount, setContext } from 'svelte';
 import ContainerBody from './body/container/ContainerBody.svelte';
 import NoContainerSelectedComponent from './body/header/NoContainerSelectedComponent.svelte';
 import { ConnectionSchema, type IConsole, type IContainerActor } from '$lib/schema/schema';
@@ -21,7 +21,7 @@ export let selectedDatabase : string;
 let hasDocumentSelected : boolean;
 
 let selectedContainerRef : Nullable<Container> = null;
-
+let containerDocumentCount : Nullable<number> = null;
 let selectedContainerAction : IContainerActor = {
 	name: ContainerActions.Documents,
 	consoleId: undefined
@@ -38,20 +38,29 @@ $: {
 }
 
 $: {
-	if(selectedContainer !== undefined)
+	if(selectedContainer !== undefined){
 		azureService.container.getRef(selectedContainer, selectedDatabase)
 			.then(x => {
 				if(x){
 					selectedContainerRef = x;
 					schema.updateContainerFor(selectedDatabase, x?.id);
 					updateConnectionSchema(schema);
+					azureService.container.count(x).then(result => {
+						containerDocumentCount = result;
+					})
 				}else{
 					selectedContainer = undefined;
+					containerDocumentCount = undefined;
 				}
 			})
 			.catch(er => {
 				console.log(er)
+				selectedContainer = undefined;
+				containerDocumentCount = undefined;
 			});
+	}else{
+		containerDocumentCount = undefined;
+	}
 }
 
 async function saveCurrentDoc(){
@@ -164,6 +173,12 @@ async function processConsoleSelected(cs : IConsole){
 	selectedContainer = boundContainer;
 }
 
+async function exportData(type : string){
+	if(type === 'json'){
+		containerBody?.exportDataJson();
+	}
+}
+
 onMount( async () => {
 	await loadContainers();
 });
@@ -186,10 +201,12 @@ onMount( async () => {
 			hasContainerSelected={selectedContainer !== undefined}
 			availableContainers={availableContainers}
 			hasDocumentSelected={hasDocumentSelected}
+			documentCount={containerDocumentCount}
 			bind:selectedContainerAction={selectedContainerAction}
 			bind:selectedContainer={selectedContainer}
 			activeConsoles={store}
 			on:create-console={async () => {await createConsole()}}
+			on:export-as-json={async () => {await exportData('json')}}
 			on:delete-console={async (e) => {await deleteConsole(e.detail)}}
 			on:execute-query={async (e) => {await executeQuery(e.detail)}}
 			on:save-doc={async () => {await saveCurrentDoc()}}

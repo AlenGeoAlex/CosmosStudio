@@ -1,6 +1,8 @@
 <script lang="ts">
 import { Separator } from '$lib/components/ui/separator';
 import * as Select from "$lib/components/ui/select";
+import * as Tooltip from "$lib/components/ui/tooltip";
+
 import { Button } from '$lib/components/ui/button';
 import MoreSettingsComponent from './MoreSettingsComponent.svelte';
 import ContainerSearch from './ContainerSearch.svelte';
@@ -12,6 +14,8 @@ import { createEventDispatcher } from 'svelte';
 import type { Readable } from 'svelte/store';
 import { ContainerActions } from '$lib/constants/enums';
 import { Play, Save } from 'lucide-svelte';
+import { Badge } from '$lib/components/ui/badge';
+import { formatNumber } from '$lib/utils';
 const dispatcher = createEventDispatcher();
 
 export let hasContainerSelected : boolean;
@@ -20,6 +24,8 @@ export let activeConsoles : Readable<IConsole[]>;
 export let selectedContainer : string | undefined = undefined;
 export let selectedContainerAction : IContainerActor;
 export let hasDocumentSelected : boolean
+
+export let documentCount : Nullable<number>;
 
 const options : {
 	searchQueries : Map<string, string>,
@@ -46,6 +52,8 @@ $: {
 	}
 }
 
+
+
 </script>
 
 <div class="hidden h-full flex-col md:flex">
@@ -64,11 +72,23 @@ $: {
 		<div class="basis-2/12 text-center">
 			<div class="">
 				<div class="flex gap-3 justify-center items-center">
-					<div class="flex flex-row justify-center items-center gap-4">
+					<div class="flex flex-row justify-center items-center gap-2">
+						{#if (documentCount !== null && documentCount !== undefined)}
+
+							<Tooltip.Root>
+								<Tooltip.Trigger>
+									<Badge variant="outline">{formatNumber(documentCount, 1)}</Badge>
+								</Tooltip.Trigger>
+								<Tooltip.Content>
+									<p>{`${selectedContainer} has ${documentCount} documents`}</p>
+								</Tooltip.Content>
+							</Tooltip.Root>
+
+						{/if}
 						{#if (selectedContainerAction.name === ContainerActions.Documents)}
-							<Button disabled={!hasDocumentSelected} on:click={() => {dispatcher('save-doc')}} size="icon" variant="ghost">
-								<Save size={20}></Save>
-							</Button>
+								<Button disabled={!hasDocumentSelected} on:click={() => {dispatcher('save-doc')}} size="icon" variant="ghost">
+									<Save size={20}></Save>
+								</Button>
 						{:else if (selectedContainerAction.name.startsWith('console'))}
 							<Button size="icon" variant="ghost">
 								<Play class="text-green-500" size={20}></Play>
@@ -91,7 +111,9 @@ $: {
 					</div>
 					<Separator orientation="vertical"></Separator>
 					<MoreSettingsComponent
+						hasContainerSelected={hasContainerSelected}
 						on:create-console
+						on:export-as-json
 					></MoreSettingsComponent>
 
 				</div>

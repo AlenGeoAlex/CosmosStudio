@@ -89,6 +89,11 @@
 		selectedDocument = document;
 
 	}
+
+	export async function getData() : Promise<any> {
+		return documentArray;
+	}
+
 	async function getPartitionKey() : Promise<string> {
 		const getPartitionKeyDefinitionPromise = await selectedContainerRef.getPartitionKeyDefinition();
 		const paths = getPartitionKeyDefinitionPromise.resource?.paths;
@@ -382,6 +387,21 @@
 		}
 	}
 
+	function getPartitionValue(doc : any) : Nullable<string>{
+		if(doc === null || doc === undefined)
+			return undefined;
+
+		const partitionProp = partitionKey?.slice(1);
+		if(!partitionProp)
+			return undefined;
+
+		if(partitionProp in doc){
+			return doc[partitionProp];
+		}else{
+			return undefined;
+		}
+	}
+
 	async function remove(id : string){
 		const findIndex = documentArray.findIndex(x => x.id === id);
 		documentArray.slice(findIndex, 1);
@@ -396,6 +416,9 @@
 		if(currentIterator === null || currentIterator === undefined) {
 			return;
 		}
+		if(!currentIterator.hasMoreResults()){
+			return
+		}
 		loadingMore = true;
 
 		try {
@@ -406,6 +429,9 @@
 			});
 			const feedResponse = await currentIterator.fetchNext();
 			const resources = feedResponse.resources;
+			if(!resources || resources.length === 0){
+				return;
+			}
 			documentArray = documentArray.concat(resources);
 			toast.info('Success', {
 				description: `Loaded ${resources.length} more on [${documentArray.length}] results and costed ≈ ${Math.round(feedResponse.requestCharge)} RU`
@@ -420,7 +446,10 @@
 
 	}
 
-	function copy(content : string){
+	function copy(content : string | null | undefined){
+		if(content === null || content === undefined)
+			return;
+
 		copyToClipboard(content)
 			.then(x => {
 				toast.info(`Copied ${shorten(content)} to clipboard`)
@@ -485,14 +514,14 @@
 									<Table.Cell class="">
 										<!-- svelte-ignore a11y-no-static-element-interactions -->
 										<!-- svelte-ignore a11y-click-events-have-key-events -->
-										<span on:click={() => {copy(document[partitionKey.slice(1)]?.toString() ?? ``)}} class="hover:text-gray-300">
-											{shorten(document[partitionKey.slice(1)]?.toString() ?? ``, 36)}
+										<span on:click={() => {copy(getPartitionValue(document))}} class="hover:text-gray-300">
+											{shorten(getPartitionValue(document), 36)}
 										</span>
 									</Table.Cell>
 									<Table.Cell class="text-right">
 										{#if (savingDocument !== null && savingDocument !== undefined && savingDocument.id === document.id)}
 											<Upload size={14}></Upload>
-										{:else if (document.id === selectedDocument.id)}
+										{:else if (selectedDocument.id === document?.id)}
 											<!-- svelte-ignore a11y-click-events-have-key-events -->
 											<div role="button" tabindex="0" on:mouseenter={() => {isHoveringForRefresh = true}} on:mouseleave={() => {isHoveringForRefresh = false}} on:click={ async () => {if(!isHoveringForRefresh) return; await refresh(document)}}>
 												{#if isHoveringForRefresh}

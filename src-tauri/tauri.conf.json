@@ -30,6 +30,9 @@
         "readDir": true,
         "removeFile": true,
         "createDir": true
+      },
+      "dialog": {
+        "open": true
       }
     },
 

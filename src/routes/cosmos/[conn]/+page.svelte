@@ -5,7 +5,7 @@
 	import { AzureService } from '$lib/service/azure-service';
 	import { SpinnerService } from '$lib/service/spinner-service';
 	import { updateConnectionSchema, restoreConnectionHistoryServices } from '$lib/service/connection-history-service';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, setContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import type { DatabaseManageResponse, IDatabase } from '$lib/components/models/azure-models';
 	import HeaderComponent from './(components)/HeaderComponent.svelte';
@@ -16,6 +16,7 @@
 
 	export let data : PageData;
 	const schema : ConnectionSchema = data.schema;
+	setContext<ConnectionSchema>('connectionSchema', schema);
 	let currentState : DashboardState = DashboardState.Started;
 	const service : AzureService = AzureService.build(schema);
 	const ac = new AbortController();

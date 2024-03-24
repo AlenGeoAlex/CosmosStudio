@@ -25,3 +25,14 @@ export enum ConsoleType {
     Function = "UFN",
     Query = "Query"
 }
+
+export enum ContextKeys {
+    ConnectionSchema = "connectionSchema"
+}
+
+export enum ExportType {
+    JSON = "json",
+    CSV = "csv"
+}
+
+export const ExportTypes : ExportType[] = [ExportType.JSON, ExportType.CSV];

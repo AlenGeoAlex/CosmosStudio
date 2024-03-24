@@ -10,6 +10,11 @@ function createConsole(){
 	dispatcher('create-console')
 }
 
+function exportAsJson(){
+	dispatcher('export-as-json');
+}
+
+export let hasContainerSelected : boolean;
 
 </script>
 
@@ -24,11 +29,14 @@ function createConsole(){
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content>
 			<DropdownMenu.Group>
-				<DropdownMenu.Label>Import</DropdownMenu.Label>
+				<DropdownMenu.Label>Import/Export</DropdownMenu.Label>
 				<DropdownMenu.Separator />
 				<DropdownMenu.Item>New</DropdownMenu.Item>
-				<DropdownMenu.Item>From JSON</DropdownMenu.Item>
-				<DropdownMenu.Item>From CSV</DropdownMenu.Item>
+				<DropdownMenu.Item>Import from JSON</DropdownMenu.Item>
+				<DropdownMenu.Item>Import from CSV</DropdownMenu.Item>
+				{#if (hasContainerSelected)}
+					<DropdownMenu.Item on:click={async () => {await exportAsJson();}}>Export</DropdownMenu.Item>
+				{/if}
 			</DropdownMenu.Group>
 			<DropdownMenu.Separator />
 			<DropdownMenu.Group>

@@ -196,6 +196,12 @@ class ContainerService {
 		}
 	}
 
+	async count(containerRef : Container) : Promise<number>{
+		const queryIterator = containerRef.items.query("SELECT COUNT(1) AS count FROM C");
+		const feedResponse = await queryIterator.fetchNext();
+		return feedResponse.resources[0]?.count ?? 0;
+	}
+
 }
 
 class QueryAdapter {

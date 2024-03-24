@@ -4,6 +4,16 @@ import { cubicOut } from 'svelte/easing';
 import type { TransitionConfig } from 'svelte/transition';
 import { ErrorResponse } from '@azure/cosmos';
 
+const numberFormattingLookup = [
+    { value: 1, symbol: "" },
+    { value: 1e3, symbol: "k" },
+    { value: 1e6, symbol: "M" },
+    { value: 1e9, symbol: "G" },
+    { value: 1e12, symbol: "T" },
+    { value: 1e15, symbol: "P" },
+    { value: 1e18, symbol: "E" }
+];
+
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
@@ -182,4 +192,10 @@ export function getInvalidDefinitions(ob: Record<string, any>, keys: string[]): 
     }
 
     return invalid;
+}
+
+export function formatNumber(num : number, digits: number) {
+    const regexp = /\.0+$|(?<=\.[0-9]*[1-9])0+$/;
+    const item = numberFormattingLookup.findLast(item => num >= item.value);
+    return item ? (num / item.value).toFixed(digits).replace(regexp, "").concat(item.symbol) : "0";
 }

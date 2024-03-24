@@ -184,7 +184,6 @@
         dispatcher('remove-confirm', connection)
     }
 
-    $: {console.log(connection.databases)}
 
 </script>
 
