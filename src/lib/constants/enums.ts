@@ -35,4 +35,17 @@ export enum ExportType {
     CSV = "csv"
 }
 
+export enum ExportResponse {
+    Unknown = "unknown",
+    NoData = "no-data",
+    FileSystemError = "file-system-error",
+    FailedToGenerateZip = "failed-to-generate-zip",
+    ErrorCreatingZip = "error-creating-zip",
+    ErrorWritingZip = "error-writing-zip",
+    NoPath = "no-path",
+    Success = "success"
+}
+
 export const ExportTypes : ExportType[] = [ExportType.JSON, ExportType.CSV];
+
+export const AzureMetaKeys = ["_ts", "_rid", "_self", "_etag", "_attachments", "_ttl"];

@@ -90,7 +90,7 @@
 
 	}
 
-	export async function getData() : Promise<any> {
+	export function getLoadedDocuments() : Promise<any> {
 		return documentArray;
 	}
 

@@ -5,7 +5,7 @@
 	import ConsoleComponent from './console/ConsoleComponent.svelte';
 	import type { Container } from '@azure/cosmos';
 	import type { AzureService } from '$lib/service/azure-service';
-  import { ExportService } from '$lib/service/export-service';
+  import { ImportExportService } from '$lib/service/import-export-service';
   import ExportDialog from '$lib/components/shared/components/ExportDialog.svelte';
 
 	export let selectedContainer : string;
@@ -14,6 +14,7 @@
 	export let selectedContainerRef : Container;
 	export let azureService : AzureService;
 	export let hasDocumentSelected : boolean = false;
+  let dataSource : () => Promise<any> | undefined;
 	let exportSettingsOpen : boolean = false;
 	let documentBody : Nullable<DocumentComponent>;
 	export async function documentExecute(query : string){
@@ -22,6 +23,18 @@
 
 	export async function saveCurrentDoc(){
 		await documentBody?.saveCurrent();
+	}
+
+	$: {
+		if(selectedContainerActor.consoleId){
+			dataSource = async () => {
+				return [];
+			}
+		}else{
+			if(selectedContainerActor.name === ContainerActions.Documents){
+				dataSource = () => documentBody?.getLoadedDocuments();
+			}
+		}
 	}
 
 	export async function exportDataJson(){
@@ -42,6 +55,7 @@
 			bind:open={exportSettingsOpen}
 			selectedContainer={selectedContainer}
 			individualFiles={true}
+			dataSource={dataSource}
 		></ExportDialog>
 	{/if}
 	{#if (selectedContainerActor.consoleId === undefined)}

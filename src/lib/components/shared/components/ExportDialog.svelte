@@ -16,15 +16,17 @@
   import { Spinner } from 'flowbite-svelte';
   import { SpinnerService } from '$lib/service/spinner-service';
   import { onDestroy } from 'svelte';
+  import { ImportExportService } from '$lib/service/import-export-service';
   const isBrowser = browser && !('__TAURI__' in window)
 	export let open : boolean = false;
 	export let exportType : Selected<ExportType> | undefined;
 	export let individualFiles : boolean = true;
-	export let identifierKeys : Nullable<string> = "id";
+	export let identifierKeys : string = "id";
+	export let dataSource : () => Promise<any>;
 	export let selectedContainer : string;
 	let zipChecked = false;
-	let zipFileName = `export-${new Date().toUTCString().replaceAll(" ", "-")}-${new Date().toLocaleTimeString().replaceAll(" ",  "-")}.zip`
-	let saveDirectory : Nullable<string> = undefined;
+	let zipFileName = `export-${new Date().getTime()}.zip`;
+	let saveDirectory : string | undefined = undefined;
 	let ignoreAzureKeys : boolean = true;
 	function handleZipFileName(e : any){
 		if(e.target.value){
@@ -34,7 +36,7 @@
 
 			zipFileName = `${value}.zip`
 		}else{
-			zipFileName = `export-${new Date().toUTCString().replaceAll(" ", "-")}-${new Date().toLocaleTimeString().replaceAll(" ",  "-")}.zip`;
+			zipFileName = `export-${new Date().getTime()}.zip`;
 		}
 	}
 
@@ -67,6 +69,11 @@
 			}else{
 		  isExportValid = true
 			}
+
+			if(exportType && exportType.value === "csv"){
+				individualFiles = false;
+				zipChecked = false;
+			}
 	}
 
 	async function startExport(){
@@ -75,9 +82,22 @@
 						text: "Starting Export",
 						color: 'green'
 				});
+				if(exportType?.value === "json"){
+					const data = await dataSource();
+					const directory = saveDirectory as string;
+					const exportResponse = await ImportExportService.jsonService?.to(data, {
+							asZip: zipChecked,
+							ignoreAzureMetadata: ignoreAzureKeys,
+							saveIndividually: individualFiles,
+							saveDirectory: directory,
+							fileIdentifierProperty: identifierKeys,
+							zipName: zipFileName ?? undefined,
+					});
+					SpinnerService.unset();
+				}else{
+
+				}
 	  	}finally {
-				await delay(2500);
-		  	SpinnerService.unset();
 			  open = false;
 	  	}
 	}
@@ -139,9 +159,9 @@
 			{/if}
 			<div class="grid grid-cols-4 items-center gap-4">
 				<Label for="zip" class="text-right">Single Zip</Label>
-				<Checkbox class="col-span-1" bind:checked={zipChecked} id="zip" />
+				<Checkbox disabled={exportType && exportType.value === 'csv'} class="col-span-1" bind:checked={zipChecked} id="zip" />
 				<Label for="indFiles" class="text-right">Seperate Files</Label>
-				<Checkbox bind:checked={individualFiles} id="indFiles" />
+				<Checkbox disabled={exportType && exportType.value === 'csv'} bind:checked={individualFiles} id="indFiles" />
 			</div>
 			{#if zipChecked}
 				<div class="grid grid-cols-4 items-center gap-4">

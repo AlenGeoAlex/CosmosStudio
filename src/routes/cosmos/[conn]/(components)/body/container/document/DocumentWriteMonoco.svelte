@@ -3,10 +3,11 @@
 	import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
 	import { theme } from '$lib/components/shared/monaco';
 	import { getMatchingElementsInArray, isNullOrUndefined } from '$lib/utils';
+  import { AzureMetaKeys } from '$lib/constants/enums';
 	const regex = /"([^"]+)"(?=\s*:\s*)/g;
 
 	const dispatcher = createEventDispatcher();
-	const restrictedKeys = ["_ts", "_rid", "_self", "_etag", "_attachments", "_ttl"];
+	const restrictedKeys = AzureMetaKeys;
 	let editor: Monaco.editor.IStandaloneCodeEditor;
 	let monaco: typeof Monaco;
 	let editorContainer: HTMLElement;
