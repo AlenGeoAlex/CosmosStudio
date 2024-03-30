@@ -27,7 +27,7 @@ export class ConsoleService {
 			boundContainer: containerName,
 			content: undefined,
 			lastUpdated: Date.now(),
-			consoleType: type
+			consoleType: type,
 		}
 
 		const key = DynamicKey.of([connectionId, dbName, cs.id], "console");
@@ -56,7 +56,7 @@ export class ConsoleService {
 			boundContainer: copyRef.boundContainer,
 			content: copyRef.content,
 			lastUpdated: Date.now(),
-			consoleType: copyRef.consoleType
+			consoleType: copyRef.consoleType,
 		}
 		const key = DynamicKey.of([connectionId, dbName, console.id], "console");
 		writable.update(x => {
@@ -95,6 +95,18 @@ export class ConsoleService {
 			const consoleUpdated = x.filter(x => x.id !== consoleId);
 			store.fileStore().remove(key)
 			return consoleUpdated;
+		})
+	}
+
+	public static async save(connectionId : string, dbName: string, console : IConsole){
+		const {writeStore : writable} = await ConsoleService.getStore(connectionId, dbName);
+		const key = DynamicKey.of([connectionId, dbName, console.id], "console");
+		console.lastUpdated = new Date().getTime();
+		writable.update(x => {
+			let index = x.findIndex(x => x.id === console.id);
+			x[index] = console;
+			store.fileStore().set(key, console);
+			return x;
 		})
 	}
 

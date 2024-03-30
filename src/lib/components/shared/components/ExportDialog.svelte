@@ -64,11 +64,7 @@
 				isExportValid = false;
 			}else if(!saveDirectory){
 				isExportValid = false;
-			}else if(zipChecked && isNullOrUndefined(zipFileName) && !zipFileName.endsWith(".zip") && zipFileName !== ".zip"){
-				isExportValid = false;
-			}else{
-		  isExportValid = true
-			}
+			}else isExportValid = !(zipChecked && isNullOrUndefined(zipFileName) && !zipFileName.endsWith(".zip") && zipFileName !== ".zip");
 
 			if(exportType && exportType.value === "csv"){
 				individualFiles = false;

@@ -26,7 +26,7 @@ export let selectedContainerAction : IContainerActor;
 export let hasDocumentSelected : boolean
 
 export let documentCount : Nullable<number>;
-
+export let isConsoleDirty : boolean;
 const options : {
 	searchQueries : Map<string, string>,
 	currentSelectedQuery : string | undefined,
@@ -61,6 +61,7 @@ $: {
 		<div class="basis-1/12 text-center">
 			<ContainerActionSelector
 				activeConsoles={activeConsoles}
+				isConsoleDirty={isConsoleDirty}
 				bind:selectedAction={selectedContainerAction}
 				on:delete-console
 				on:console-selected

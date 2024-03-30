@@ -12,7 +12,6 @@ import { editor } from 'monaco-editor';
 // @ts-ignore
 import IStandaloneThemeData = editor.IStandaloneThemeData;
 
-
 self.MonacoEnvironment = {
 	getWorker: function (_: string, label: string) {
 		switch (label) {
@@ -27,9 +26,10 @@ self.MonacoEnvironment = {
 	}
 };
 
+
 export default monaco;
 
-export const theme : IStandaloneThemeData = {
+export const jsonTheme : IStandaloneThemeData = {
 	base: "vs-dark",
 	inherit: true,
 	rules: [

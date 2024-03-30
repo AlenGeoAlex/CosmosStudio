@@ -18,6 +18,7 @@ export let schema : ConnectionSchema;
 export let azureService : AzureService;
 export let selectedContainer : string | undefined;
 export let selectedDatabase : string;
+let isConsoleDirty : boolean;
 let hasDocumentSelected : boolean;
 
 let selectedContainerRef : Nullable<Container> = null;
@@ -60,6 +61,21 @@ $: {
 			});
 	}else{
 		containerDocumentCount = undefined;
+	}
+}
+
+$: {
+	if(selectedContainerAction.consoleId && selectedContainer){
+		ConsoleService.get(schema.id, selectedDatabase, selectedContainerAction.consoleId)
+			.then((console) => {
+					if(console && console.boundContainer !== selectedContainer){
+							selectedContainerAction = {
+								name: ContainerActions.Documents,
+								consoleId: undefined
+						};
+					}
+			})
+
 	}
 }
 
@@ -205,6 +221,7 @@ onMount( async () => {
 			bind:selectedContainerAction={selectedContainerAction}
 			bind:selectedContainer={selectedContainer}
 			activeConsoles={store}
+			isConsoleDirty={isConsoleDirty}
 			on:create-console={async () => {await createConsole()}}
 			on:export-as-json={async () => {await exportData('json')}}
 			on:delete-console={async (e) => {await deleteConsole(e.detail)}}
@@ -215,6 +232,7 @@ onMount( async () => {
 	{/await}
 	{#if (selectedContainer !== null && selectedContainer !== undefined && ( selectedContainerRef !== null && selectedContainerRef !== undefined))}
 		<ContainerBody
+			bind:isConsoleDirty
 			bind:selectedContainer={selectedContainer}
 			bind:selectedContainerActor={selectedContainerAction}
 			bind:this={containerBody}

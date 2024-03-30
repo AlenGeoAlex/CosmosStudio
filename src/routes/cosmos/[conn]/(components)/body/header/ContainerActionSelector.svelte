@@ -16,7 +16,7 @@ const DEFAULT_ACTIONS = [
 	ContainerActions.StoredProcedures,
 	ContainerActions.UserFunctions
 ];
-
+export let isConsoleDirty : boolean;
 export let activeConsoles : Readable<IConsole[]>;
 
 function deleteConsole(consoleId : string){
@@ -41,7 +41,7 @@ onMount( async () => {
 <DropdownMenu.Root>
 	<DropdownMenu.Trigger>
 		<Button variant="ghost" class="me-3">
-			<span class="me-2">{selectedAction.name}</span>
+			<span class="me-2">{selectedAction.name}{(selectedAction.consoleId && (isConsoleDirty ?? false)) ? '*' : ''}</span>
 			<ChevronDown size={15}/>
 		</Button>
 	</DropdownMenu.Trigger>
@@ -59,7 +59,7 @@ onMount( async () => {
 				{#each $activeConsoles as eachConsole}
 					<DropdownMenu.Item on:click={() => {selectedAction = {name: eachConsole.name, consoleId: eachConsole.id}; notifyConsoleSelected(eachConsole)}}>
 						<div class="flex flex-row w-full justify-between">
-							<span>{eachConsole.name}</span>
+							<span>{eachConsole.name}{(isConsoleDirty ?? false) ? '*' : ''}</span>
 							<Button variant="ghost" size="icon" class="h-5 w-4" on:click={() => {deleteConsole(eachConsole.id)}}>
 								<Trash />
 							</Button>

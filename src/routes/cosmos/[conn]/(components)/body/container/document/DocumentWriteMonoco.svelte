@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
-	import { theme } from '$lib/components/shared/monaco';
+	import { jsonTheme } from '$lib/components/shared/monaco';
 	import { getMatchingElementsInArray, isNullOrUndefined } from '$lib/utils';
   import { AzureMetaKeys } from '$lib/constants/enums';
 	const regex = /"([^"]+)"(?=\s*:\s*)/g;
@@ -17,7 +17,7 @@
 	onMount(async () => {
 		monaco = (await import('$lib/components/shared/monaco')).default;
 		const strData = JSON.stringify(document, null, 2);
-		monaco.editor.defineTheme('default-cs', theme);
+		monaco.editor.defineTheme('default-cs', jsonTheme);
 		editor = monaco?.editor.create(editorContainer, {
 			value: !isNullOrUndefined(strData) ? strData : undefined,
 			language: "json",

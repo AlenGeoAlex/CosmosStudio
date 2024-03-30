@@ -17,6 +17,8 @@
   let dataSource : () => Promise<any> | undefined;
 	let exportSettingsOpen : boolean = false;
 	let documentBody : Nullable<DocumentComponent>;
+	let consoleBody : Nullable<ConsoleComponent>
+	export let isConsoleDirty : boolean;
 	export async function documentExecute(query : string){
 		await documentBody?.executeDocumentQuery(query)
 	}
@@ -27,9 +29,7 @@
 
 	$: {
 		if(selectedContainerActor.consoleId){
-			dataSource = async () => {
-				return [];
-			}
+			dataSource = () => consoleBody?.getLoadedDocuments();
 		}else{
 			if(selectedContainerActor.name === ContainerActions.Documents){
 				dataSource = () => documentBody?.getLoadedDocuments();
@@ -70,6 +70,8 @@
 		{/if}
 	{:else}
 			<ConsoleComponent
+				bind:isConsoleDirty
+				bind:this={consoleBody}
 				selectedDatabase={selectedDatabase}
 				selectedContainerRef={selectedContainerRef}
 				selectedContainer={selectedContainer}

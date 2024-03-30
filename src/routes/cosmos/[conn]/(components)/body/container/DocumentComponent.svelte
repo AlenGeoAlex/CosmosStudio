@@ -90,7 +90,7 @@
 
 	}
 
-	export function getLoadedDocuments() : Promise<any> {
+	export async function getLoadedDocuments() : Promise<any> {
 		return documentArray;
 	}
 
@@ -442,8 +442,6 @@
 			loadingMore = false;
 			SpinnerService.unset();
 		}
-
-
 	}
 
 	function copy(content : string | null | undefined){
